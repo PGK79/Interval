@@ -1,19 +1,24 @@
 import java.util.*;
+import java.util.concurrent.*;
 
 public class Main {
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, ExecutionException {
         String[] texts = new String[25];
+
+        List<Future<Integer>> threads = new ArrayList<>();
+        List<Integer> results = new ArrayList<>();
+
+        final ExecutorService threadPool = Executors.newFixedThreadPool(4);
+
         for (int i = 0; i < texts.length; i++) {
             texts[i] = generateText("aab", 30_000);
         }
 
         long startTs = System.currentTimeMillis(); // start time
 
-        List<Thread> threads = new ArrayList<>();
-
         for (String text : texts) {
-            Runnable logic = () -> {
+            Callable<Integer> myCallable = () -> {
                 int maxSize = 0;
                 for (int i = 0; i < text.length(); i++) {
                     for (int j = 0; j < text.length(); j++) {
@@ -32,21 +37,24 @@ public class Main {
                         }
                     }
                 }
-                System.out.println(text.substring(0, 100) + " -> " + maxSize);
+                return maxSize;
             };
 
-            Thread thread = new Thread(logic);
-            threads.add(thread);
-            thread.start();
+            final Future<Integer> task = threadPool.submit(myCallable);
+            threads.add(task);
         }
 
-        for (Thread thread : threads) {
-            thread.join();
+        for (Future<Integer> result : threads) {
+            results.add(result.get());
+
         }
+        System.out.println("Имеющиеся интервалы " + results);
+        System.out.println("Максимальный интервал " + Collections.max(results));
 
         long endTs = System.currentTimeMillis(); // end time
 
         System.out.println("Time: " + (endTs - startTs) + "ms");
+        threadPool.shutdown();
     }
 
     public static String generateText(String letters, int length) {
