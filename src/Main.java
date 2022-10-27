@@ -37,6 +37,7 @@ public class Main {
                         }
                     }
                 }
+                System.out.println(text.substring(0, 100) + " -> " + maxSize);
                 return maxSize;
             };
 
@@ -48,12 +49,12 @@ public class Main {
             results.add(result.get());
 
         }
-        System.out.println("Имеющиеся интервалы " + results);
-        System.out.println("Максимальный интервал " + Collections.max(results));
+
+        System.out.println("\nМаксимальный интервал равен: " + Collections.max(results));
 
         long endTs = System.currentTimeMillis(); // end time
 
-        System.out.println("Time: " + (endTs - startTs) + "ms");
+        System.out.println("\nTime: " + (endTs - startTs) + "ms");
         threadPool.shutdown();
     }
 
